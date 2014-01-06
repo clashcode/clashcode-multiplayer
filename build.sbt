@@ -1,4 +1,4 @@
-name := "wordguess-server"
+name := "clashcode-multiplayer"
 
 version := "1.0-SNAPSHOT"
 

@@ -5,10 +5,8 @@ import com.clashcode.web.views
 import play.api.libs.iteratee.{ Iteratee, Concurrent }
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.Logger
-import play.api.libs.json.{ Json, JsValue }
+import play.api.libs.json.{JsObject, Json, JsValue}
 import akka.actor.ActorRef
-import actors.ActorPlayer
-import clashcode.logic.{ NonWord, Token }
 
 object Application extends Controller {
 
@@ -16,19 +14,7 @@ object Application extends Controller {
 
   var maybeHostingActor = Option.empty[ActorRef]
 
-  def pushTokens(tokens: Seq[Token]) = channel.push(
-    Json.obj(
-      "tokens" -> Json.toJson(tokens.map(t => t.str)),
-      "nonWords" -> Json.toJson(tokens.zipWithIndex.filter(_._1.isInstanceOf[NonWord]).map(_._2))))
-
-  def push(players: Seq[ActorPlayer]) = channel.push(
-    Json.obj("players" ->
-      Json.toJson(players.map(p =>
-        Json.obj(
-          "name" -> p.player.name,
-          "lastAction" -> p.lastAction,
-          "games" -> p.totalGames)))))
-
+  def push(obj: JsObject) = channel.push(obj)
   def push(message: String) = channel.push(Json.obj("status" -> message))
 
   def index = Action { implicit request =>
@@ -41,8 +27,8 @@ object Application extends Controller {
     // ignore incoming websocket traffic
     val in = Iteratee.foreach[JsValue] {
       msg =>
-        Logger.debug(msg.toString)
-        val action = (msg \ "action").asOpt[String].getOrElse("")
+        //Logger.debug(msg.toString)
+        maybeHostingActor.foreach(actor => actor ! msg)
     } map {
       _ => Logger.info("removed listener")
     }

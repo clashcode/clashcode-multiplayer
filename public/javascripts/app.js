@@ -1,57 +1,66 @@
 
 $(function() {
 
+    var FIELD_WIDTH = 20;
+    var FIELD_HEIGHT = 24;
+    var latency = 100;
+
     function update(data) {
 
-        if (data.status) {
+        if (data.state) {
 
-            $('#status-table tbody').prepend($('<tr>').append($('<td>').text(data.status)))
-            while ($('#status-table tbody tr').length > 15) {
-                $('#status-table tbody tr').last().remove()
-            }
-        }
-        else if (data.players) {
-            $('#players-table tbody').empty();
-            $.each(data.players, function() {
-                var p = this
-                $('#players-table tbody').append(
-                    $('<tr>')
-                        .append($('<td>').text(p.name))
-                        .append($('<td>').text(""))
-                        .append($('<td>').text(""))
-                        .append($('<td>').text(p.games))
-                        .append($('<td>').text(moment(p.lastAction).fromNow()))
-                        .append($('<td>').text(""))
-                        .append($('<td>').text(""))
-                )
-            })
-        }
-        else if (data.game) {
-            var p1 = data.game[0]
-            var p2 = data.game[1]
+            var blocks = data.state.blocks;
 
-            var getColor = function(coop) {
-                if (coop === true) return "#ccff66";
-                else if (coop === false) return "#ffcc00";
-                return "#cccccc"
+            var movingBlocks = data.state.movingBlocks;
+
+            // predict my moving block
+            var myBlock = movingBlocks[0];
+
+            // calculate latency
+            if (data.state.maybeMove)
+            {
+                var delay = Date.now() - data.state.maybeMove.date;
+                latency = Math.max(delay, 0)
             }
 
-            $('#games-table tbody').prepend(
-                $('<tr>')
-                    .append($('<td>').text(moment().format('HH:mm:ss')))
-                    .append($('<td>').text(p1.points))
-                    .append($('<td>').text(p1.name).css('background-color', getColor(p1.cooperate)))
-                    .append($('<td>').text(p2.name).css('background-color', getColor(p2.cooperate)))
-                    .append($('<td>').text(p2.points))
-            )
 
-            while ($('#games-table tbody tr').length > 15) {
-                $('#games-table tbody tr').last().remove()
+            var blockDivs = [];
+            for (var y = 0; y < FIELD_HEIGHT; y++)
+            {
+                for (var x = 0; x < FIELD_WIDTH; x++)
+                {
+                    var index = x + y * FIELD_WIDTH;
+                    if (movingBlocks.exists(function(b) { return b.y == y && b.x == x; }))
+                        blockDivs.push($('<div class="block moving"></div>'))
+                    else if (blocks[index])
+                        blockDivs.push($('<div class="block fixed"></div>'))
+                    else
+                        blockDivs.push($('<div class="block"></div>'))
+                }
             }
+
+            var field = $('#game-field');
+            field.empty();
+            field.append(blockDivs);
+
+            $('#output').text(JSON.stringify(movingBlocks))
         }
         else
             console.log(data)
     }
+
+    $(document).keydown(function(e){
+        if (e.keyCode == 37) { // left
+            send({ move: 'left', date: Date.now() })
+        } else if (e.keyCode == 39) { // right
+            send({ move: 'right', date: Date.now() })
+        } else if (e.keyCode == 40) { // down
+            send({ move: 'down', date: Date.now() })
+        }
+        return false;
+    });
+
+
 
     var websocket = new WebSocket(wsUri);
     websocket.onopen = function(evt) {
@@ -67,7 +76,15 @@ $(function() {
     websocket.onerror = function(evt) { update({ status: evt.data}) };
 
     $('#reset-button').click(function() {
-        websocket.send(JSON.stringify({ action: "reset" }));
+        //send({ action: "reset" });
     })
+
+    $('#disconnect-button').click(function() {
+        websocket.close();
+    })
+
+    function send(obj) {
+        websocket.send(JSON.stringify(obj));
+    }
 
 })

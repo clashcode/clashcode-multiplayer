@@ -1,6 +1,6 @@
 @(websocketUrl: String)
 
-@main("WordGuess - Live Feed") {
+@main("Multiplayer - Live Feed") {
 
     <script>
         var wsUri = "@websocketUrl";
@@ -8,55 +8,14 @@
 
     <div class="container">
 
-        <h1>WordGuess Live Feed</h1>
+        <h1>Multiplayer Blocks</h1>
 
-        <div class="row">
-            <div class="col-md-4">
+        <div id="game-field"></div>
 
-                <table class="table-striped table table-condensed" id="status-table">
-                    <thead>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-
-            </div>
-            <div class="col-md-8">
-
-                <table class="table-striped table" id="players-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Score</th>
-                            <th>Coop %</th>
-                            <th>Games</th>
-                            <th>Last message</th>
-                            <th>Ping</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-
-                <table class="table-striped table" id="games-table">
-                    <thead>
-                        <tr>
-                            <th>Latest games</th>
-                            <th></th>
-                            <th>Player 1</th>
-                            <th>Player 2</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-
-            </div>
-        </div>
+        <div id="output"></div>
 
         <button id="connect-button" class="btn">Connect</button>
+        <button id="disconnect-button" class="btn">Disconnect</button>
         <button id="reset-button" class="btn">Reset</button>
 
     </div>

@@ -1,11 +1,11 @@
 import akka.actor._
 import akka.cluster.Cluster
 import akka.cluster.ClusterEvent._
+import clashcode.GameServerActor
 import com.clashcode.web.controllers.Application
 import play.api.Application
 import play.api.{Play, GlobalSettings, Logger, Application}
 import scala.Some
-import actors.GameServerActor
 
 object Global extends GlobalSettings {
 

@@ -1,17 +1,25 @@
-.playing {
-  background: pink;
-}
-.solved {
-  background: lightGreen;
+
+
+#game-field {
+  width: 410px;
+  height: 490px;
+
+  margin-bottom: 10px;
+  border: 5px solid black;
+  background-color: white;
 }
 
-#wordsContainer {
-  padding: 50px;
-  font-size: 23pt;
-  font-family: monospace;
+#game-field .block {
+    float: left;
+    width: 20px;
+    height: 20px;
 }
 
-.underscore {
-  padding-left: 2px;
-  padding-right: 2px;
+#game-field .block.moving {
+    background-color: red;
 }
+
+#game-field .block.fixed {
+    background-color: darkgray;
+}
+
