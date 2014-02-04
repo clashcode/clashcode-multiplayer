@@ -1,6 +1,10 @@
 package clashcode.logic
 
-case class Move(x: Int = 0, y: Int = 0, date: Long = 0) {
+case class Move(
+                x: Int = 0,
+                y: Int = 0,
+                clientDate: Long = 0,
+                delay: Long = 0) {
   def isEmpty = (x == 0 && y == 0)
 }
 
@@ -55,9 +59,7 @@ case class GameState(
   def getNext(moves: Seq[Move]) : GameState = {
     this.copy(
       index = index + 1,
-      movingBlocks = movingBlocks.zip(moves).map {
-        case (b, m) => b.getNext(m)
-    },
+      movingBlocks = movingBlocks.zip(moves).map { case (b, m) => b.getNext(m) },
       maybeMove = moves.headOption.filter(!_.isEmpty)
     )
   }

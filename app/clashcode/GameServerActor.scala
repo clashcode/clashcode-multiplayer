@@ -11,7 +11,7 @@ import scala.collection.mutable
 import org.joda.time.DateTime
 
 trait GameParameters {
-  def gameIntervalMs = 200
+  def gameIntervalMs = 100
   def timeOutSeconds = 5 * 60
 }
 
@@ -30,27 +30,23 @@ class GameServerActor extends Actor with GameParameters {
 
   def receive = {
     case GameTick => handleTick()
-    //case move: Move => handleMove(move)
+
     case value: JsValue =>
-      val date = (value \ "date").as[Long]
-      val delay = (commands.length + 1) * gameIntervalMs - DateTime.now().getMillis + lastTick
-      Logger.info(value.toString + " " + delay)
-      val correctedDate = date + delay
-      (value \ "move").asOpt[String] match {
-        case Some("left") => handleMove(Move(-1, 0, correctedDate))
-        case Some("right") => handleMove(Move(1, 0, correctedDate))
-        case Some("down") => handleMove(Move(0, 1, correctedDate))
-      }
+      val rawMove = value.as[Move]
+      val delay = gameIntervalMs - DateTime.now().getMillis + lastTick
+      val move = rawMove.copy(delay = delay)
+      //Logger.info(value.toString + " " + delay)
+      handleMove(move)
   }
 
   var gameState = GameStateHelper.getInitialGameState
   val commands = mutable.Queue.empty[Move]
   var lastTick = DateTime.now().getMillis
 
+  /** keep last received move */
   def handleMove(move: Move) {
-    // keep last 2 commands
-    if (commands.length <= 1) commands.enqueue(move)
-    //while (commands.length > 2) commands.dequeue()
+    while (commands.length > 0) commands.dequeue()
+    commands.enqueue(move)
   }
 
   def handleTick() {

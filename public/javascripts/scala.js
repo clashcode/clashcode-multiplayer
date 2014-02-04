@@ -107,6 +107,15 @@ Array.prototype.remove = function(elem) {
     if (index >= 0) this.splice(index, 1);
 }
 
+// zip array with another array (returning array of array element tuples)
+Array.prototype.zip = function(array) {
+    var result = [];
+    var length = Math.min(this.length, array.length);
+    for(var i = 0; i < length; i++)
+        result.push([this[i], array[i]]);
+    return result;
+}
+
 // shuffle an array in place
 Array.prototype.shuffle = function() {
     var array = this;
